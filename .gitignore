@@ -20,3 +20,9 @@ CMakeCache.txt
 *.sdf
 *.sln
 *.suo
+
+/Debug
+/ipch
+/Win32
+/concorrente-ep2.dir
+*.opensdf
