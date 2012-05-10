@@ -19,9 +19,13 @@ int main(int argc, char **argv) {
         cout << "Erro ao abrir '" << argv[2] << "'" << endl;
         return 2;
     }
-    cout << N << endl;
+    cout << "Procurando os " << N << " menores caminhos." << endl;
     Graph g(arquivo);
+    cout << "Grafo: " << endl << g;
 
-    cout << g;
+    for(size_t j = 1; j < g.size(); ++j) {
+        /* Procura N menores caminhos aqui. */
+        /* Imprime a saída. */
+    }
     return 0;
 }

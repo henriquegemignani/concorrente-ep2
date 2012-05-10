@@ -43,6 +43,8 @@ class Graph {
         return out;
     }
 
+    size_t size() const { return matrix_.size(); }
+
   private:
     std::vector< std::vector<bool> > matrix_;
 };
