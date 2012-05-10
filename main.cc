@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 #include "graph.h"
 
 #define NUM_CORES 4
@@ -13,7 +14,7 @@ int main(int argc, char **argv) {
         cout << "Uso: " << argv[0] << " N <path para arquivo de topologia>" << endl;
         return 1;
     }
-    int N = atoi(argv[1]);
+    int N = std::atoi(argv[1]);
     std::ifstream arquivo(argv[2]);
     if(!arquivo.is_open()) {
         cout << "Erro ao abrir '" << argv[2] << "'" << endl;
