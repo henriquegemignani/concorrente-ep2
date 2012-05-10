@@ -5,6 +5,10 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include "path.h"
+
+typedef int Vertex;
+typedef std::list<Vertex> Path;
 
 class Graph {
   public:
@@ -19,6 +23,7 @@ class Graph {
 
         size_t size = first_line_vect.size();
         matrix_.resize(size);
+        paths_.resize(size);
         matrix_[0] = first_line_vect;
         for(size_t j = 1; j < size; ++j) {
             std::vector<bool>& row = matrix_[j];
@@ -47,6 +52,7 @@ class Graph {
 
   private:
     std::vector< std::vector<bool> > matrix_;
+	std::vector< std::list<Path> > paths_;
 };
 
 #endif /* GRAPH_H_ */
