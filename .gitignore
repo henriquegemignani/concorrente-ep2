@@ -25,4 +25,6 @@ CMakeCache.txt
 /ipch
 /Win32
 /concorrente-ep2.dir
-*.opensdf
+*.opensdfMakefile
+concorrente-ep2
+Makefile
