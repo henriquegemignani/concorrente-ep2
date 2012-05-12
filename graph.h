@@ -32,6 +32,7 @@ class Graph {
         size_ = size;
         matrix_.resize(size);
         paths_.resize(size);
+        paths_per_vertex_.resize(size);
         matrix_[0] = first_line_vect;
         for(size_t j = 1; j < size; ++j) {
             std::vector<bool>& row = matrix_[j];
@@ -45,7 +46,20 @@ class Graph {
 
     }
 
-    void BuscaEmLargura(Vertex v) {
+    void PrintPaths() {
+        for(int i = 0; i < size_; i++) {
+            std::list<Path>::iterator it;
+            for(it = paths_per_vertex_[i].begin(); it!=paths_per_vertex_[i].end(); it++) {
+                std::list<Vertex>::iterator vertex = (*it).begin();
+                printf("%d", (*vertex));
+                for(vertex++ ; vertex != (*it).end(); vertex++)
+                    printf(" -> %d", (*vertex));
+                printf("\n");
+            }
+        }
+    }
+
+    const std::list<Path>& menores_caminhos(Vertex v) {
         std::queue<QueueItem> queue = std::queue<QueueItem>();
         std::list<Vertex> vertex_list;
         QueueItem item;
@@ -57,21 +71,31 @@ class Graph {
         item.path.push_front(v);
         queue.push(item);
         BuscaEmLarguraIterativa(queue);
+        return paths_;
     }
 
     void BuscaEmLarguraIterativa(std::queue<QueueItem> queue) {
+        int n_paths = 0;
         QueueItem item;
+        for(int i = 0; i < size_; i++)
+            paths_per_vertex_[i].clear();
         while(!queue.empty()) {
             item = queue.front();
             queue.pop();
-            for(int i = 0; i < size_; i++)
+            int i;
+            for(i = 0; i < size_; i++)
                 if(matrix_[item.path.back()][i] && !item.parents[i]) {
-                    printf("%d -> %d\n", item.path.back(), i);
+                    n_paths++;
                     QueueItem itemn = {item.path, item.parents};
                     itemn.path.push_back(i);
                     itemn.parents[i] = true;
                     queue.push(itemn);
+                    paths_per_vertex_[i].push_back(itemn.path);
                 }
+            if(n_paths == 0)
+                paths_.push_back(item.path);
+            else
+                n_paths = 0;
         }
     }
 
@@ -92,7 +116,8 @@ class Graph {
 
   private:
     std::vector< std::vector<bool> > matrix_;
-	std::vector< std::list<Path> > paths_;
+	std::vector< std::list<Path> > paths_per_vertex_;
+	std::list<Path> paths_;
     int size_;
 };
 

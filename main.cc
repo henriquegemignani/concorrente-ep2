@@ -24,11 +24,13 @@ int main(int argc, char **argv) {
     Graph g(arquivo);
     cout << "Grafo: " << endl << g;
 
-    g.BuscaEmLargura(0);
+    const std::list<Path>& paths = g.menores_caminhos(0);
 
     for(size_t j = 1; j < g.size(); ++j) {
         /* Procura N menores caminhos aqui. */
         /* Imprime a saída. */
     }
+
+    g.PrintPaths();
     return 0;
 }
