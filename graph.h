@@ -1,13 +1,13 @@
 #ifndef GRAPH_H_
 #define GRAPH_H_
 
-#include <pthread.h>
 #include <iostream>
 #include <sstream>
 #include <queue>
 #include <vector>
 #include <string>
 #include <list>
+#include "mutex.h"
 
 #define NUM_CORES 4
 
@@ -40,15 +40,11 @@ class Graph {
         // A quantidade de elementos da primeira linha é o tamanho do grafo
         size_ = first_line_vect.size();
         matrix_.resize(size_);
-        paths_.resize(size_);
         paths_per_vertex_.resize(size_);
         vertex_lock_.resize(size_);
 
         // Guarda a primeira linha
         matrix_[0] = first_line_vect;
-        pthread_mutex_init(&vertex_lock_[0], NULL);
-        pthread_mutex_init(&queue_mutex_, NULL);
-        pthread_mutex_init(&counter_mutex_, NULL);
 
         // Le as outras linhas.
         for(size_t j = 1; j < size_; ++j) {
@@ -59,24 +55,10 @@ class Graph {
                 input >> x;
                 row[i] = (x != 0);
             }
-            pthread_mutex_init(&vertex_lock_[j], NULL);
         }
 
     }
-
-    ~Graph() {
-        for(size_t i = 0; i < size_; i++)
-            pthread_mutex_destroy(&vertex_lock_[i]);
-        pthread_mutex_destroy(&queue_mutex_);
-        pthread_mutex_destroy(&counter_mutex_);
-    }
-
-    QueueItem createQueueItem(Vertex v) {
-        QueueItem item(size_);
-        item.parents[v] = true;
-        item.path.push_front(v);
-        return item;
-    }
+    ~Graph() {}
 
     const std::list<Path>& menores_caminhos(Vertex v) {
         return paths_per_vertex_[v];
@@ -97,33 +79,45 @@ class Graph {
         queue_.push(createQueueItem(v));
     }
 
+    QueueItem get_from_queue() {
+        queue_mutex_.Lock();
+        QueueItem item = queue_.front();
+        queue_.pop();
+        queue_mutex_.Unlock();
+        return item;
+    }
+
+
     void BuscaEmLarguraIterativa() {
-        pthread_mutex_lock(&counter_mutex_);
+        puts("Entrou na busca em largura.");
+        counter_mutex_.Lock();
         num_cores_finished_++;
-        pthread_mutex_unlock(&counter_mutex_);
-        while(num_cores_finished_ != 2) { }
+        counter_mutex_.Unlock();
+        while(num_cores_finished_ != 1) {}
+        puts("Saiu da barreira da entrada.");
 
         while(!queue_.empty()) {
-            pthread_mutex_lock(&queue_mutex_);
-            QueueItem item = queue_.front();
-            queue_.pop();
-            pthread_mutex_unlock(&queue_mutex_);
+            QueueItem item = get_from_queue();
             for(size_t i = 0; i < size_; i++)
                 if(matrix_[item.path.back()][i] && !item.parents[i]) {
                     QueueItem itemn = item;
                     itemn.path.push_back(i);
                     itemn.parents[i] = true;
-                    pthread_mutex_lock(&queue_mutex_);
+
+                    queue_mutex_.Lock();
                     queue_.push(itemn);
-                    pthread_mutex_unlock(&queue_mutex_);
-                    pthread_mutex_lock(&vertex_lock_[i]);
+                    queue_mutex_.Unlock();
+
+                    vertex_lock_[i].Lock();
                     paths_per_vertex_[i].push_back(itemn.path);
-                    pthread_mutex_unlock(&vertex_lock_[i]);
+                    vertex_lock_[i].Unlock();
                 }
-            pthread_mutex_lock(&counter_mutex_);
+
+            counter_mutex_.Lock();
             num_cores_finished_--;
-            pthread_mutex_unlock(&counter_mutex_);
+            counter_mutex_.Unlock();
             while(num_cores_finished_ != 0) {}
+            puts("Saiu da barreira do loop.");
         }
     }
 
@@ -143,13 +137,19 @@ class Graph {
     size_t size() const { return matrix_.size(); }
 
   private:
-    std::vector<pthread_mutex_t> vertex_lock_;
-    pthread_mutex_t queue_mutex_;
-    pthread_mutex_t counter_mutex_;
+    QueueItem createQueueItem(Vertex v) {
+        QueueItem item(size_);
+        item.parents[v] = true;
+        item.path.push_front(v);
+        return item;
+    }
+
+
+    std::vector<Mutex> vertex_lock_;
+    Mutex queue_mutex_, counter_mutex_;
 
     std::vector< std::vector<bool> > matrix_;
     std::vector< std::list<Path> > paths_per_vertex_;
-    std::list<Path> paths_;
     std::queue<QueueItem> queue_;
     size_t size_;
 

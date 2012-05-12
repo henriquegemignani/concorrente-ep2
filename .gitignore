@@ -28,3 +28,5 @@ CMakeCache.txt
 *.opensdfMakefile
 concorrente-ep2
 Makefile
+
+/concorrente-ep2.opensdf
