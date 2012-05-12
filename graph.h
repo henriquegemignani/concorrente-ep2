@@ -56,17 +56,20 @@ class Graph {
 
     }
 
+    QueueItem createQueueItem(Vertex v) {
+        QueueItem item(size_);
+        item.parents[v] = true;
+        item.path.push_front(v);
+        return item;
+    }
+
     const std::list<Path>& menores_caminhos(Vertex v) {
         return paths_per_vertex_[v];
     }
 
     void CalculaMenoresCaminhosDe(Vertex v) {
-        QueueItem item(size_);
-        item.parents[v] = true;
-        item.path.push_front(v);
-
         std::queue<QueueItem> queue = std::queue<QueueItem>();
-        queue.push(item);
+        queue.push(createQueueItem(v));
         BuscaEmLarguraIterativa(queue);
     }
 
