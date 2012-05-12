@@ -20,24 +20,32 @@ typedef item QueueItem;
 class Graph {
   public:
     Graph(std::istream& input) {
+
+        // Le a primeira linha da entrada
         std::string first_line;
         std::getline(input, first_line);
         std::stringstream first_line_stream(first_line);
+
+        // Parseia a primeira linha e guarda num vector
         int x;
         std::vector<bool> first_line_vect;
         while(first_line_stream >> x)
             first_line_vect.push_back(x != 0);
 
-        size_t size = first_line_vect.size();
-        size_ = size;
-        matrix_.resize(size);
-        paths_.resize(size);
-        paths_per_vertex_.resize(size);
+        // A quantidade de elementos da primeira linha é o tamanho do grafo
+        size_ = first_line_vect.size();
+        matrix_.resize(size_);
+        paths_.resize(size_);
+        paths_per_vertex_.resize(size_);
+
+        // Guarda a primeira linha
         matrix_[0] = first_line_vect;
-        for(size_t j = 1; j < size; ++j) {
+
+        // Le as outras linhas.
+        for(size_t j = 1; j < size_; ++j) {
             std::vector<bool>& row = matrix_[j];
-            row.resize(size);
-            for(size_t i = 0; i < size; ++i) {
+            row.resize(size_);
+            for(size_t i = 0; i < size_; ++i) {
                 int x;
                 input >> x;
                 row[i] = (x != 0);
@@ -116,9 +124,9 @@ class Graph {
 
   private:
     std::vector< std::vector<bool> > matrix_;
-	std::vector< std::list<Path> > paths_per_vertex_;
-	std::list<Path> paths_;
-    int size_;
+    std::vector< std::list<Path> > paths_per_vertex_;
+    std::list<Path> paths_;
+    size_t size_;
 };
 
 #endif /* GRAPH_H_ */
