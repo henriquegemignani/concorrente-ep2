@@ -31,11 +31,18 @@ int main(int argc, char **argv) {
     Graph g(arquivo);
     cout << "Grafo: " << endl << g << endl;
 
+    g.ClearPaths();
+    g.InitializeSearch(0);
     {
         /* Procura N menores caminhos aqui. */
-        Worker w(GraphWorker, &g);
-        w.Run();
-        w.Join();
+        std::vector<Worker> w(2, Worker(GraphWorker, &g));
+            
+        for(int i = 0; i < 2; i++) {
+            printf("Inicializando thread %d\n", i);
+            w[i].Run();
+        }
+        /*for(int i = 0; i < 2; i++)
+            w[i].Join();*/
     }
 
     /* Imprime a saída. */
