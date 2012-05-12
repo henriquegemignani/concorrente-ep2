@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     cout << "Procurando os " << N << " menores caminhos." << endl;
     Graph g(arquivo);
     cout << "Grafo: " << endl << g;
-
+    
     const std::list<Path>& paths = g.menores_caminhos(0);
 
     for(size_t j = 1; j < g.size(); ++j) {

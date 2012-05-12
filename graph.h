@@ -59,17 +59,21 @@ class Graph {
         }
     }
 
-    const std::list<Path>& menores_caminhos(Vertex v) {
-        std::queue<QueueItem> queue = std::queue<QueueItem>();
-        std::list<Vertex> vertex_list;
+    QueueItem createQueueItem(Vertex v) {
         QueueItem item;
-
         item.parents = Parents(size_);
         item.path = Path();
         item.parents[v] = true;
-        vertex_list.push_front(v);
         item.path.push_front(v);
+        return item;
+    }
+
+    const std::list<Path>& menores_caminhos(Vertex v) {
+        std::list<Vertex> vertex_list;
+        std::queue<QueueItem> queue = std::queue<QueueItem>();
+        QueueItem item = createQueueItem(v);
         queue.push(item);
+        
         BuscaEmLarguraIterativa(queue);
         return paths_;
     }
