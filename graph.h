@@ -3,12 +3,19 @@
 
 #include <iostream>
 #include <sstream>
+#include <queue>
 #include <vector>
 #include <string>
-#include "path.h"
+#include <list>
 
 typedef int Vertex;
 typedef std::list<Vertex> Path;
+typedef std::vector<bool> Parents;
+struct item {
+    Path path;
+    Parents parents;
+};
+typedef item QueueItem;
 
 class Graph {
   public:
@@ -22,6 +29,7 @@ class Graph {
             first_line_vect.push_back(x != 0);
 
         size_t size = first_line_vect.size();
+        size_ = size;
         matrix_.resize(size);
         paths_.resize(size);
         matrix_[0] = first_line_vect;
@@ -36,6 +44,38 @@ class Graph {
         }
 
     }
+
+    void BuscaEmLargura(Vertex v) {
+        std::queue<QueueItem> queue = std::queue<QueueItem>();
+        std::list<Vertex> vertex_list;
+        QueueItem item;
+
+        item.parents = Parents(size_);
+        item.path = Path();
+        item.parents[v] = true;
+        vertex_list.push_front(v);
+        item.path.push_front(v);
+        queue.push(item);
+        BuscaEmLarguraIterativa(queue);
+    }
+
+    void BuscaEmLarguraIterativa(std::queue<QueueItem> queue) {
+        QueueItem item;
+        while(!queue.empty()) {
+            item = queue.front();
+            queue.pop();
+            for(int i = 0; i < size_; i++)
+                if(matrix_[item.path.back()][i] && !item.parents[i]) {
+                    printf("%d -> %d\n", item.path.back(), i);
+                    QueueItem itemn = {item.path, item.parents};
+                    itemn.path.push_back(i);
+                    itemn.parents[i] = true;
+                    queue.push(itemn);
+                }
+        }
+    }
+
+    int size() { return size_; }
 
     friend std::ostream& operator<< (std::ostream& out, const Graph& g) {
         std::vector< std::vector<bool> >::const_iterator j;
@@ -53,6 +93,7 @@ class Graph {
   private:
     std::vector< std::vector<bool> > matrix_;
 	std::vector< std::list<Path> > paths_;
+    int size_;
 };
 
 #endif /* GRAPH_H_ */
