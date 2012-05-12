@@ -10,12 +10,14 @@
 
 typedef int Vertex;
 typedef std::list<Vertex> Path;
-typedef std::vector<bool> Parents;
-struct item {
-    Path path;
-    Parents parents;
+
+struct QueueItem {
+    std::list<Vertex> path;
+    std::vector<bool> parents;
+
+    QueueItem(size_t size)
+        : parents(size) {}
 };
-typedef item QueueItem;
 
 class Graph {
   public:
@@ -54,56 +56,35 @@ class Graph {
 
     }
 
-    void PrintPaths() {
-        for(int i = 0; i < size_; i++) {
-            std::list<Path>::iterator it;
-            for(it = paths_per_vertex_[i].begin(); it!=paths_per_vertex_[i].end(); it++) {
-                std::list<Vertex>::iterator vertex = (*it).begin();
-                printf("%d", (*vertex));
-                for(vertex++ ; vertex != (*it).end(); vertex++)
-                    printf(" -> %d", (*vertex));
-                printf("\n");
-            }
-        }
+    const std::list<Path>& menores_caminhos(Vertex v) {
+        return paths_per_vertex_[v];
     }
 
-    const std::list<Path>& menores_caminhos(Vertex v) {
-        std::queue<QueueItem> queue = std::queue<QueueItem>();
-        std::list<Vertex> vertex_list;
-        QueueItem item;
-
-        item.parents = Parents(size_);
-        item.path = Path();
+    void CalculaMenoresCaminhosDe(Vertex v) {
+        QueueItem item(size_);
         item.parents[v] = true;
-        vertex_list.push_front(v);
         item.path.push_front(v);
+
+        std::queue<QueueItem> queue = std::queue<QueueItem>();
         queue.push(item);
         BuscaEmLarguraIterativa(queue);
-        return paths_;
     }
 
     void BuscaEmLarguraIterativa(std::queue<QueueItem> queue) {
-        int n_paths = 0;
-        QueueItem item;
-        for(int i = 0; i < size_; i++)
+        for(size_t i = 0; i < size_; i++)
             paths_per_vertex_[i].clear();
+
         while(!queue.empty()) {
-            item = queue.front();
+            QueueItem item = queue.front();
             queue.pop();
-            int i;
-            for(i = 0; i < size_; i++)
+            for(size_t i = 0; i < size_; i++)
                 if(matrix_[item.path.back()][i] && !item.parents[i]) {
-                    n_paths++;
-                    QueueItem itemn = {item.path, item.parents};
+                    QueueItem itemn = item;
                     itemn.path.push_back(i);
                     itemn.parents[i] = true;
                     queue.push(itemn);
                     paths_per_vertex_[i].push_back(itemn.path);
                 }
-            if(n_paths == 0)
-                paths_.push_back(item.path);
-            else
-                n_paths = 0;
         }
     }
 

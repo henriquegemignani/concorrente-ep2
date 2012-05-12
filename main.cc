@@ -3,11 +3,18 @@
 #include <fstream>
 #include <cstdlib>
 #include "graph.h"
+#include "worker.h"
 
 #define NUM_CORES 4
 
 using std::cout;
 using std::endl;
+
+void* GraphWorker(void* data) {
+    Graph* g = static_cast<Graph*>(data);
+    g->CalculaMenoresCaminhosDe(0);
+    return NULL;
+}
 
 int main(int argc, char **argv) {
     if(argc < 3) {
@@ -22,15 +29,27 @@ int main(int argc, char **argv) {
     }
     cout << "Procurando os " << N << " menores caminhos." << endl;
     Graph g(arquivo);
-    cout << "Grafo: " << endl << g;
+    cout << "Grafo: " << endl << g << endl;
 
-    const std::list<Path>& paths = g.menores_caminhos(0);
-
-    for(size_t j = 1; j < g.size(); ++j) {
+    {
         /* Procura N menores caminhos aqui. */
-        /* Imprime a saída. */
+        Worker w(GraphWorker, &g);
+        w.Run();
+        w.Join();
     }
 
-    g.PrintPaths();
+    /* Imprime a saída. */
+    for(int j = 1; j < g.size(); ++j) {
+        cout << "Caminhos para o vertice " << j << endl;
+        const std::list<Path>& caminhos = g.menores_caminhos(j);
+        for(std::list<Path>::const_iterator it = caminhos.begin(); it != caminhos.end(); ++it) {
+            cout << '\t';
+            Path::const_iterator v = it->begin();
+            cout << *v;
+            for(++v; v != it->end(); ++v)
+                cout << " -> " << *v;
+            cout << endl;
+        }
+    }
     return 0;
 }
