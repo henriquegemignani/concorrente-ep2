@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
 	for(size_t i = 0; i < num_cores_; i++)
 		delete w[i];
 
-    printf("Saida:\n");
+    printf("\n\nSaida:\n");
     /* Imprime a saída. */
     for(int j = 1; j < g.size(); ++j) {
         cout << "Caminhos para o vertice " << j << endl;

@@ -130,10 +130,12 @@ class Graph {
             /* Este código de if vai claramente contra a restricao de simetria do EP,
                porem eh usado pois eh apenas codigo de debug */
             if(thread_number == 0)
-                printf("Iteracao %d.\n", iteration_number_++);
-            printf("Thread %d chegou na barreira.\n", thread_number);
+                printf("\nIteracao %d:\n", iteration_number_++);
+			
+        	printf("T%d-B1 ", thread_number);
 			Barreira(thread_number);
             if(list_of_paths_.empty()) break;
+        	printf("T%d-B2 ", thread_number);
 			Barreira(thread_number);
 
             queue_mutex_.Lock();
