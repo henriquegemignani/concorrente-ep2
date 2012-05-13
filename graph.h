@@ -85,7 +85,10 @@ class Graph {
         max_paths_ = N;
     }
 
+    size_t iteration_number() { return iteration_number_; }
+
     void CalculaMenoresCaminhosDe(Vertex v) {
+
         BuscaEmLarguraIterativa(num_threads++);
     }
 
@@ -94,7 +97,7 @@ class Graph {
         threads_finished_ = false;
         path_size_.resize(num_cores);
         num_cores_waiting_ = 0;
-        iteration_number_ = 0;
+        iteration_number_ = 1;
         
         if (num_cores_ < 2)
             num_cores_ = 2;
