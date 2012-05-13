@@ -15,7 +15,7 @@ typedef std::list<Vertex> Path;
 
 static int num_threads = 0;
 
-static unsigned int log2 (unsigned int val) {
+static unsigned int number_log2 (unsigned int val) {
     /* Warning: This very obviously DOES NOT WORK FOR THE NUMBER 0 */
     unsigned int ret = 0, number_of_ones_ = 0;
     do {
@@ -40,7 +40,6 @@ struct QueueItem {
 class Graph {
   public:
     Graph(std::istream& input) {
-
         // Le a primeira linha da entrada
         std::string first_line;
         std::getline(input, first_line);
@@ -99,7 +98,7 @@ class Graph {
         if (num_cores_ < 2)
             num_cores_ = 2;
 
-        number_of_stages_ = log2(num_cores_);
+        number_of_stages_ = number_log2(num_cores_);
 
         for(size_t i = 0; i < size_; i++) {
             paths_per_vertex_[i].clear();
@@ -117,9 +116,11 @@ class Graph {
     }
 
 	void Barreira(int thread_number) {
+		size_t sum = 1;
 		for(size_t i = 1; i <= number_of_stages_; i++) {
 			arrived[thread_number]++;
-			int next_arrive = (thread_number+(2^(i-1))) % num_cores_;
+			int next_arrive = (thread_number+sum) % num_cores_;
+			sum <<= 1;
 			while (arrived[next_arrive] < arrived[thread_number]) {};
 		}
 	}
