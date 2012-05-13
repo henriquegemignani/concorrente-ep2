@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
 	for(size_t i = 0; i < num_cores_; i++)
 		delete w[i];
 
-    printf("Saida:\n");
+    printf("\n\nSaida:\n");
     /* Imprime a saida. */
     printf("Realizadas %d iteracoes.\n", g.iteration_number() - 1);
     for(int j = 1; j < g.size(); ++j) {
