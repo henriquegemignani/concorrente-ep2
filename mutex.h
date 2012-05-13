@@ -8,7 +8,7 @@ class Mutex {
     Mutex() {
         pthread_mutex_init(&mutex_, NULL);
     }
-    Mutex(Mutex& m) {
+    Mutex(Mutex&) {
         pthread_mutex_init(&mutex_, NULL);
     }
     ~Mutex() {

@@ -7,7 +7,7 @@ typedef void* (*WorkerFunction)(void*);
 
 class Worker {
   public:
-    Worker(WorkerFunction f, void* data) : function_(f), data_(data) {
+    Worker(WorkerFunction f, void* data) : function_(f), data_(data), id_(id_generator++) {
         pthread_attr_init(&attr_);
         pthread_attr_setdetachstate(&attr_, PTHREAD_CREATE_JOINABLE);
     }
@@ -29,6 +29,10 @@ class Worker {
     pthread_attr_t attr_;
     WorkerFunction function_;
     void* data_;
+    int id_;
+    static int id_generator;
 };
+
+int Worker::id_generator = 0;
 
 #endif /* WORKER_H_ */

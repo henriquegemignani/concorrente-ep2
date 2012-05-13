@@ -79,45 +79,36 @@ class Graph {
         queue_.push(createQueueItem(v));
     }
 
-    QueueItem get_from_queue() {
-        queue_mutex_.Lock();
-        QueueItem item = queue_.front();
-        queue_.pop();
-        queue_mutex_.Unlock();
-        return item;
-    }
-
-
     void BuscaEmLarguraIterativa() {
         puts("Entrou na busca em largura.");
         counter_mutex_.Lock();
         num_cores_finished_++;
         counter_mutex_.Unlock();
-        while(num_cores_finished_ != 1) {}
+        while(num_cores_finished_ != 2) {}
         puts("Saiu da barreira da entrada.");
 
-        while(!queue_.empty()) {
-            QueueItem item = get_from_queue();
-            for(size_t i = 0; i < size_; i++)
-                if(matrix_[item.path.back()][i] && !item.parents[i]) {
-                    QueueItem itemn = item;
-                    itemn.path.push_back(i);
-                    itemn.parents[i] = true;
+        while(!queue_.empty()) {            
+            queue_mutex_.Lock();
+            if(!queue_.empty()) {
+                QueueItem item = queue_.front();
+                queue_.pop();
+                queue_mutex_.Unlock();
+                for(size_t i = 0; i < size_; i++)
+                    if(matrix_[item.path.back()][i] && !item.parents[i]) {
+                        QueueItem itemn = item;
+                        itemn.path.push_back(i);
+                        itemn.parents[i] = true;
 
-                    queue_mutex_.Lock();
-                    queue_.push(itemn);
-                    queue_mutex_.Unlock();
+                        queue_mutex_.Lock();
+                        queue_.push(itemn);
+                        queue_mutex_.Unlock();
 
-                    vertex_lock_[i].Lock();
-                    paths_per_vertex_[i].push_back(itemn.path);
-                    vertex_lock_[i].Unlock();
-                }
-
-            counter_mutex_.Lock();
-            num_cores_finished_--;
-            counter_mutex_.Unlock();
-            while(num_cores_finished_ != 0) {}
-            puts("Saiu da barreira do loop.");
+                        vertex_lock_[i].Lock();
+                        paths_per_vertex_[i].push_back(itemn.path);
+                        vertex_lock_[i].Unlock();
+                    }
+            } else
+                queue_mutex_.Unlock();
         }
     }
 

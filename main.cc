@@ -35,15 +35,20 @@ int main(int argc, char **argv) {
     g.InitializeSearch(0);
     {
         /* Procura N menores caminhos aqui. */
-        std::vector<Worker> w(1, Worker(GraphWorker, &g));
+        std::vector<Worker*> w;
+        w.push_back(new Worker(GraphWorker, &g));
+        w.push_back(new Worker(GraphWorker, &g));
             
-        for(int i = 0; i < 1; i++) {
+        for(int i = 0; i < 2; i++) {
             printf("Inicializando thread %d\n", i);
-            w[i].Run();
+            w[i]->Run();
         }
 
-        for(int i = 0; i < 1; i++)
-            w[i].Join();
+        for(int i = 0; i < 2; i++)
+            w[i]->Join();
+
+        for(std::vector<Worker*>::iterator it = w.begin(); it != w.end(); ++it)
+            delete (*it);
     }
 
     /* Imprime a saída. */
