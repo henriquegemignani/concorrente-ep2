@@ -57,6 +57,7 @@ class Graph {
         matrix_.resize(size_);
         paths_per_vertex_.resize(size_);
         vertex_lock_.resize(size_);
+        number_of_paths_per_vertex_.resize(size_);
         
         // Guarda a primeira linha
         matrix_[0] = first_line_vect;
@@ -89,7 +90,6 @@ class Graph {
     }
 
     void Initialize(size_t num_cores, Vertex v) {
-        minimum_path_size_ = 0;
         num_cores_ = num_cores;
         threads_finished_ = false;
         path_size_.resize(num_cores);
@@ -100,8 +100,10 @@ class Graph {
 
         number_of_stages_ = log2(num_cores_);
 
-        for(size_t i = 0; i < size_; i++)
+        for(size_t i = 0; i < size_; i++) {
             paths_per_vertex_[i].clear();
+            number_of_paths_per_vertex_[i] = 0;
+        }
         
         arrived.resize(num_cores_);
         for(size_t i = 0; i < num_cores; i++)
@@ -110,7 +112,7 @@ class Graph {
     }
 
     void InitializeSearch(Vertex v) {
-        queues_per_pathsize_.push_front(createQueueItem(v));
+        list_of_paths_.push_front(createQueueItem(v));
     }
 
 	void Barreira(int thread_number) {
@@ -128,7 +130,7 @@ class Graph {
             counter_mutex_.Lock();
             if(num_cores_waiting_ == num_cores_ - 1) {
                 printf("Size - %d, -%d-\n", size_, num_cores_waiting_);
-                if(queues_per_pathsize_.empty())
+                if(list_of_paths_.empty())
                     threads_finished_ = true;
                 num_cores_waiting_ = 0;
                 counter_mutex_.Unlock();
@@ -143,7 +145,7 @@ class Graph {
             
 			Barreira(thread_number);
             /* Tentativa falha (ate agora) de implementar uma barreira borboleta */
-            if(queues_per_pathsize_.empty()) break;
+            if(list_of_paths_.empty()) break;
 			Barreira(thread_number);
 
             /* Fim da Barreira */
@@ -152,39 +154,35 @@ class Graph {
             //printf("Thread %d verificando paths.\n", thread_number);
             queue_mutex_.Lock();
 
-            if(queues_per_pathsize_.empty()) {
+            if(list_of_paths_.empty()) {
                 queue_mutex_.Unlock();
                 continue;
             }
-            /*if(queues_per_pathsize_[minimum_path_size_].empty()) {
-                minimum_path_size_++;
-                printf("Thread %d termino verificacao primeira paths.\n", thread_number);
-                if(queues_per_pathsize_[minimum_path_size_].empty()) {
-                    queue_mutex_.Unlock();
-                    continue;
-                }
-            }*/
             
             //printf("Thread %d termino verificacao paths.\n", thread_number);
 
-            QueueItem item = queues_per_pathsize_.front();
-            queues_per_pathsize_.pop_front();
+            QueueItem item = list_of_paths_.front();
+            list_of_paths_.pop_front();
             queue_mutex_.Unlock();
             path_size_[thread_number] = item.path.size();
 			std::cout << "Path: Size " << path_size_[thread_number] << ".\n";
             for(size_t i = 0; i < size_; i++) {
                 vertex_lock_[i].Lock();
-                if(matrix_[item.path.back()][i] && !item.parents[i]) {
+                if(matrix_[item.path.back()][i] && number_of_paths_per_vertex_[i] < max_paths_ && !item.parents[i]) {
                     vertex_lock_[i].Unlock();
+                    number_of_paths_per_vertex_[i]++;
                     QueueItem itemn = item;
                     itemn.path.push_back(i);
                     itemn.parents[i] = true;
 
                     queue_mutex_.Lock();
-                    if(path_size_[thread_number] < itemn.path.back())
-                        queues_per_pathsize_.push_front(itemn);
+                    if(!list_of_paths_.empty())
+                        if(itemn.path.size() < list_of_paths_.back().path.size())
+                            list_of_paths_.push_front(itemn);
+                        else
+                            list_of_paths_.push_back(itemn);
                     else
-                        queues_per_pathsize_.push_back(itemn);
+                        list_of_paths_.push_front(itemn);
                     queue_mutex_.Unlock();
 
                     vertex_lock_[i].Lock();
@@ -194,9 +192,7 @@ class Graph {
                 else
                     vertex_lock_[i].Unlock();
             }
-            printf("Thread %d exiting for. %s\n",thread_number,(threads_finished_)?"true":"false");
         }
-        printf("Exiting thread.");
     }
 
     int size() { return size_; }
@@ -231,10 +227,11 @@ class Graph {
     std::vector< size_t > path_size_;
     std::vector< std::vector<bool> > matrix_;
     std::vector< std::list<Path> > paths_per_vertex_;
-    std::list<QueueItem> queues_per_pathsize_;
+    std::list<QueueItem> list_of_paths_;
 
     std::vector<size_t> arrived;
-    size_t size_, minimum_path_size_;
+    std::vector<size_t> number_of_paths_per_vertex_;
+    size_t size_;
     size_t num_cores_waiting_;
     size_t max_paths_;
     size_t number_of_stages_;
