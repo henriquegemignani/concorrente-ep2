@@ -5,10 +5,26 @@
 #include "graph.h"
 #include "worker.h"
 
+/* Includes dependentes de ambiente. Achados usando Google. */
+#ifdef __unix__ /* __unix__ eh normalmente definido por compiladores compilando para sistemas Unix. */
+# include <unistd.h>
+#elif defined _WIN32 /* _Win32 eh normalmente definido por compiladores compilando para sistemas Windows de 32 ou 64 bits */
+# include <windows.h>
+#endif
+
 #define NUM_CORES 4
 
 using std::cout;
 using std::endl;
+
+struct WorkerData {
+    Graph& graph;
+    int thread_number;
+
+    WorkerData(Graph& g, int t_number)
+        : graph(g),
+          thread_number(t_number) {}
+};
 
 void* GraphWorker(void* data) {
     Graph* g = static_cast<Graph*>(data);
@@ -17,6 +33,7 @@ void* GraphWorker(void* data) {
 }
 
 int main(int argc, char **argv) {
+    size_t num_cores_;
     if(argc < 3) {
         cout << "Uso: " << argv[0] << " N <path para arquivo de topologia>" << endl;
         return 1;
@@ -29,28 +46,46 @@ int main(int argc, char **argv) {
     }
     cout << "Procurando os " << N << " menores caminhos." << endl;
     Graph g(arquivo);
-    cout << "Grafo: " << endl << g << endl;
+    //cout << "Grafo: " << endl << g << endl;
 
-    g.ClearPaths();
-    g.InitializeSearch(0);
+    /* Standard number of threads */
+    num_cores_ = 2;
+
+    /* Number of cores detection */
+    #ifdef WIN32
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo( &sysinfo );
+    num_cores_ = sysinfo.dwNumberOfProcessors;
+    #elif unix
+    num_cores_ = sysconf( _SC_NPROCESSORS_ONLN );
+    #endif
+
+    /* Inicializa numero maximo de caminhos por vertice */
+    g.set_max_paths(N);
+
+    /* Chamada de inicializacao do grafo. Recebe numero de threads a gerar e vertice da qual partirao as buscas. */
+    g.Initialize(num_cores_, 0);
+
+    /* Criação e join de threads, deleção de workers. */
+    printf("Iteracao Numero %d:\n", 1);
     {
         /* Procura N menores caminhos aqui. */
         std::vector<Worker*> w;
-        w.push_back(new Worker(GraphWorker, &g));
-        w.push_back(new Worker(GraphWorker, &g));
+        for(int i = 0; i < num_cores_; i++)
+            w.push_back(new Worker(GraphWorker, &g));
             
-        for(int i = 0; i < 2; i++) {
-            printf("Inicializando thread %d\n", i);
+        for(int i = 0; i < num_cores_; i++) {
             w[i]->Run();
         }
 
-        for(int i = 0; i < 2; i++)
+        for(int i = 0; i < num_cores_; i++)
             w[i]->Join();
 
         for(std::vector<Worker*>::iterator it = w.begin(); it != w.end(); ++it)
             delete (*it);
     }
 
+    printf("Saida:\n");
     /* Imprime a saída. */
     for(int j = 1; j < g.size(); ++j) {
         cout << "Caminhos para o vertice " << j << endl;
@@ -60,7 +95,7 @@ int main(int argc, char **argv) {
             Path::const_iterator v = it->begin();
             cout << *v;
             for(++v; v != it->end(); ++v)
-                cout << " -> " << *v;
+                cout << " - " << *v;
             cout << endl;
         }
     }
