@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     num_cores_ = sysconf( _SC_NPROCESSORS_ONLN );
     #endif
 
-	cout << "Número de cores: " << num_cores_ << endl;
+	cout << "Numero de cores: " << num_cores_ << endl;
 
     /* Inicializa numero maximo de caminhos por vertice */
     g.set_max_paths(N);
@@ -66,8 +66,7 @@ int main(int argc, char **argv) {
     /* Chamada de inicializacao do grafo. Recebe numero de threads a gerar e vertice da qual partirao as buscas. */
     g.Initialize(num_cores_, 0);
 
-    /* Criação e join de threads, deleção de workers. */
-    printf("Iteracao Numero %d:\n", 1);
+    /* Criacao e join de threads, delecao de workers. */
 
 	/* Procura N menores caminhos aqui. */
 	std::vector<Worker*> w;
@@ -84,7 +83,8 @@ int main(int argc, char **argv) {
 		delete w[i];
 
     printf("\n\nSaida:\n");
-    /* Imprime a saída. */
+    /* Imprime a saida. */
+    printf("Realizadas %d iteracoes.\n", g.iteration_number() - 1);
     for(int j = 1; j < g.size(); ++j) {
         cout << "Caminhos para o vertice " << j << endl;
         const std::list<Path>& caminhos = g.menores_caminhos(j);
