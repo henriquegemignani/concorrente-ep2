@@ -5,12 +5,8 @@
 
 class Mutex {
   public:
-    Mutex() {
-        pthread_mutex_init(&mutex_, NULL);
-    }
-    Mutex(Mutex&) {
-        pthread_mutex_init(&mutex_, NULL);
-    }
+    Mutex() { pthread_mutex_init(&mutex_, NULL); }
+    Mutex(const Mutex&) { pthread_mutex_init(&mutex_, NULL); }
     ~Mutex() {
         pthread_mutex_destroy(&mutex_);
     }

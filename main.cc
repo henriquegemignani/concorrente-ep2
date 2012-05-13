@@ -6,13 +6,11 @@
 #include "worker.h"
 
 /* Includes dependentes de ambiente. Achados usando Google. */
-#ifdef __unix__ /* __unix__ eh normalmente definido por compiladores compilando para sistemas Unix. */
-# include <unistd.h>
-#elif defined _WIN32 /* _Win32 eh normalmente definido por compiladores compilando para sistemas Windows de 32 ou 64 bits */
+#ifdef _WIN32 /* _Win32 eh normalmente definido por compiladores compilando para sistemas Windows de 32 ou 64 bits */
 # include <windows.h>
+#elif __unix__ /* __unix__ eh normalmente definido por compiladores compilando para sistemas Unix. */
+# include <unistd.h>
 #endif
-
-#define NUM_CORES 4
 
 using std::cout;
 using std::endl;
@@ -52,13 +50,15 @@ int main(int argc, char **argv) {
     num_cores_ = 2;
 
     /* Number of cores detection */
-    #ifdef WIN32
+	#ifdef WIN32
     SYSTEM_INFO sysinfo;
     GetSystemInfo( &sysinfo );
     num_cores_ = sysinfo.dwNumberOfProcessors;
-    #elif unix
+    #else
     num_cores_ = sysconf( _SC_NPROCESSORS_ONLN );
     #endif
+
+	cout << "NÃºmero de cores: " << num_cores_ << endl;
 
     /* Inicializa numero maximo de caminhos por vertice */
     g.set_max_paths(N);
@@ -66,27 +66,25 @@ int main(int argc, char **argv) {
     /* Chamada de inicializacao do grafo. Recebe numero de threads a gerar e vertice da qual partirao as buscas. */
     g.Initialize(num_cores_, 0);
 
-    /* Criação e join de threads, deleção de workers. */
+    /* CriaÃ§Ã£o e join de threads, deleÃ§Ã£o de workers. */
     printf("Iteracao Numero %d:\n", 1);
-    {
-        /* Procura N menores caminhos aqui. */
-        std::vector<Worker*> w;
-        for(int i = 0; i < num_cores_; i++)
-            w.push_back(new Worker(GraphWorker, &g));
-            
-        for(int i = 0; i < num_cores_; i++) {
-            w[i]->Run();
-        }
 
-        for(int i = 0; i < num_cores_; i++)
-            w[i]->Join();
+	/* Procura N menores caminhos aqui. */
+	std::vector<Worker*> w;
+	for(size_t i = 0; i < num_cores_; i++)
+		w.push_back(new Worker(GraphWorker, &g));
+		
+	for(size_t i = 0; i < num_cores_; i++)
+		w[i]->Run();
 
-        for(std::vector<Worker*>::iterator it = w.begin(); it != w.end(); ++it)
-            delete (*it);
-    }
+	for(size_t i = 0; i < num_cores_; i++)
+		w[i]->Join();
+
+	for(size_t i = 0; i < num_cores_; i++)
+		delete w[i];
 
     printf("Saida:\n");
-    /* Imprime a saída. */
+    /* Imprime a saÃ­da. */
     for(int j = 1; j < g.size(); ++j) {
         cout << "Caminhos para o vertice " << j << endl;
         const std::list<Path>& caminhos = g.menores_caminhos(j);

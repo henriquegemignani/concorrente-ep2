@@ -10,8 +10,6 @@
 #include <cmath>
 #include "mutex.h"
 
-#define NUM_CORES 5
-
 typedef int Vertex;
 typedef std::list<Vertex> Path;
 
@@ -138,7 +136,7 @@ class Graph {
             /* Tentativa falha (ate agora) de implementar uma barreira borboleta */
             if(queues_per_pathsize_.empty())
                 break;
-            for(int i = 1; i < number_of_stages_; i++) {
+            for(size_t i = 1; i < number_of_stages_; i++) {
                 arrived[thread_number]++;
                 int next_arrive = (thread_number+(2^(i-1)))%num_cores_;
                 while(arrived[next_arrive] < arrived[thread_number]) {};
@@ -169,7 +167,7 @@ class Graph {
             queues_per_pathsize_.pop_front();
             queue_mutex_.Unlock();
             path_size_[thread_number] = item.path.size();
-            printf("Path: Size %d.\n", path_size_[thread_number]);
+			std::cout << "Path: Size " << path_size_[thread_number] << ".\n";
             for(size_t i = 0; i < size_; i++) {
                 vertex_lock_[i].Lock();
                 if(matrix_[item.path.back()][i] && !item.parents[i]) {
