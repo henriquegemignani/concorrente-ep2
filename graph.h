@@ -113,6 +113,14 @@ class Graph {
         queues_per_pathsize_.push_front(createQueueItem(v));
     }
 
+	void Barreira(int thread_number) {
+		for(size_t i = 1; i <= number_of_stages_; i++) {
+			arrived[thread_number]++;
+			int next_arrive = (thread_number+(2^(i-1))) % num_cores_;
+			while (arrived[next_arrive] < arrived[thread_number]) {};
+		}
+	}
+
     void BuscaEmLarguraIterativa(int thread_number) {
         while(!threads_finished_) {
             /* Barreira 
@@ -136,11 +144,8 @@ class Graph {
             /* Tentativa falha (ate agora) de implementar uma barreira borboleta */
             if(queues_per_pathsize_.empty())
                 break;
-            for(size_t i = 1; i < number_of_stages_; i++) {
-                arrived[thread_number]++;
-                int next_arrive = (thread_number+(2^(i-1)))%num_cores_;
-                while(arrived[next_arrive] < arrived[thread_number]) {};
-            }
+
+			Barreira(thread_number);
 
             /* Fim da Barreira */
             //printf("Thread %d saindo da barreira.\n", thread_number);
