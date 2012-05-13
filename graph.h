@@ -94,6 +94,7 @@ class Graph {
         threads_finished_ = false;
         path_size_.resize(num_cores);
         num_cores_waiting_ = 0;
+        iteration_number_ = 0;
         
         if (num_cores_ < 2)
             num_cores_ = 2;
@@ -125,47 +126,27 @@ class Graph {
 
     void BuscaEmLarguraIterativa(int thread_number) {
         while(!threads_finished_) {
-            /* Barreira 
-            printf("Thread %d atingiu a barreira.\n", thread_number);
-            counter_mutex_.Lock();
-            if(num_cores_waiting_ == num_cores_ - 1) {
-                printf("Size - %d, -%d-\n", size_, num_cores_waiting_);
-                if(list_of_paths_.empty())
-                    threads_finished_ = true;
-                num_cores_waiting_ = 0;
-                counter_mutex_.Unlock();
-            }
-            else {
-                num_cores_waiting_++;
-                counter_mutex_.Unlock();
-                printf("Thread %d esperando. --  %d\n", thread_number, num_cores_waiting_);
-                while(num_cores_waiting_ != 0) {}
-            }
-            printf("Thread %d resuming.\n", thread_number);*/
             
+            /* Este código de if vai claramente contra a restricao de simetria do EP,
+               porem eh usado pois eh apenas codigo de debug */
+            if(thread_number == 0)
+                printf("Iteracao %d.\n", iteration_number_++);
+            printf("Thread %d chegou na barreira.\n", thread_number);
 			Barreira(thread_number);
-            /* Tentativa falha (ate agora) de implementar uma barreira borboleta */
             if(list_of_paths_.empty()) break;
 			Barreira(thread_number);
 
-            /* Fim da Barreira */
-            //printf("Thread %d saindo da barreira.\n", thread_number);
-        
-            //printf("Thread %d verificando paths.\n", thread_number);
             queue_mutex_.Lock();
 
             if(list_of_paths_.empty()) {
                 queue_mutex_.Unlock();
                 continue;
             }
-            
-            //printf("Thread %d termino verificacao paths.\n", thread_number);
 
             QueueItem item = list_of_paths_.front();
             list_of_paths_.pop_front();
             queue_mutex_.Unlock();
             path_size_[thread_number] = item.path.size();
-			std::cout << "Path: Size " << path_size_[thread_number] << ".\n";
             for(size_t i = 0; i < size_; i++) {
                 vertex_lock_[i].Lock();
                 if(matrix_[item.path.back()][i] && number_of_paths_per_vertex_[i] < max_paths_ && !item.parents[i]) {
@@ -235,6 +216,7 @@ class Graph {
     size_t num_cores_waiting_;
     size_t max_paths_;
     size_t number_of_stages_;
+    size_t iteration_number_;
 };
 
 #endif /* GRAPH_H_ */
