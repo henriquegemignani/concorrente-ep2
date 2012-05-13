@@ -141,10 +141,9 @@ class Graph {
             }
             printf("Thread %d resuming.\n", thread_number);*/
             
+			Barreira(thread_number);
             /* Tentativa falha (ate agora) de implementar uma barreira borboleta */
-            if(queues_per_pathsize_.empty())
-                break;
-
+            if(queues_per_pathsize_.empty()) break;
 			Barreira(thread_number);
 
             /* Fim da Barreira */
