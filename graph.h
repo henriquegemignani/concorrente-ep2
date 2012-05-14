@@ -103,10 +103,11 @@ class Graph {
 
     void PrintGraph() {
         printf("\n");
-        for(int j = 1; j < size_; ++j) {
-            printf("Caminhos para o vertice %d.\n", j);
+        for(size_t j = 1; j < size_; ++j) {
+            printf("Caminhos para o vertice %u.\n", j);
             const std::multiset<Path, PathCompare>& caminhos = paths_per_vertex_[j];
-            for(std::multiset<Path, PathCompare>::const_iterator it = caminhos.begin(); it != caminhos.end(); ++it) {
+			size_t i = 0;
+            for(std::multiset<Path, PathCompare>::const_iterator it = caminhos.begin(); it != caminhos.end() && i < max_paths_; ++it, ++i) {
                 printf("\t");
                 Path::const_iterator v = it->begin();
                 printf("%d", *v);
