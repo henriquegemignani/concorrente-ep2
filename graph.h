@@ -51,7 +51,7 @@ class Graph {
         while(first_line_stream >> x)
             first_line_vect.push_back(x != 0);
 
-        // A quantidade de elementos da primeira linha � o tamanho do grafo
+        // A quantidade de elementos da primeira linha é o tamanho do grafo
         size_ = first_line_vect.size();
         matrix_.resize(size_);
         paths_per_vertex_.resize(size_);
@@ -131,53 +131,50 @@ class Graph {
     void BuscaEmLarguraIterativa(int thread_number) {
         while(!threads_finished_) {
             
-            /* Este c�digo de if vai claramente contra a restricao de simetria do EP,
-               porem eh usado pois eh apenas codigo de debug */
+			Barreira(thread_number);
+            
+			if(list_of_paths_.empty()) break;
+            
+			/* Este código de if vai claramente contra a restrição de simetria do EP,
+               porem é usado pois é apenas codigo de debug */
             if(thread_number == 0)
                 printf("\nIteracao %d:\n", iteration_number_++);
 			
-        	printf("T%d-B1 ", thread_number);
-			Barreira(thread_number);
-            if(list_of_paths_.empty()) break;
-        	printf("T%d-B2 ", thread_number);
 			Barreira(thread_number);
 
             queue_mutex_.Lock();
-
             if(list_of_paths_.empty()) {
                 queue_mutex_.Unlock();
                 continue;
             }
-
             QueueItem item = list_of_paths_.front();
             list_of_paths_.pop_front();
             queue_mutex_.Unlock();
+
             path_size_[thread_number] = item.path.size();
             for(size_t i = 0; i < size_; i++) {
                 vertex_lock_[i].Lock();
-                if(matrix_[item.path.back()][i] && number_of_paths_per_vertex_[i] < max_paths_ && !item.parents[i]) {
-                    vertex_lock_[i].Unlock();
-                    number_of_paths_per_vertex_[i]++;
-                    QueueItem itemn = item;
-                    itemn.path.push_back(i);
-                    itemn.parents[i] = true;
+                bool b = (matrix_[item.path.back()][i] && number_of_paths_per_vertex_[i] < max_paths_ && !item.parents[i]);
+                vertex_lock_[i].Unlock();
+				if(!b) continue;
+				number_of_paths_per_vertex_[i]++;
+				QueueItem itemn = item;
+				itemn.path.push_back(i);
+				itemn.parents[i] = true;
 
-                    queue_mutex_.Lock();
-                    if(!list_of_paths_.empty())
-                        if(itemn.path.size() < list_of_paths_.back().path.size())
-                            list_of_paths_.push_front(itemn);
-                        else
-                            list_of_paths_.push_back(itemn);
-                    else
-                        list_of_paths_.push_front(itemn);
-                    queue_mutex_.Unlock();
+				queue_mutex_.Lock();
+				if(!list_of_paths_.empty())
+					if(itemn.path.size() < list_of_paths_.back().path.size())
+						list_of_paths_.push_front(itemn);
+					else
+						list_of_paths_.push_back(itemn);
+				else
+					list_of_paths_.push_front(itemn);
+				queue_mutex_.Unlock();
 
-                    vertex_lock_[i].Lock();
-                    paths_per_vertex_[i].push_back(itemn.path);
-                    vertex_lock_[i].Unlock();
-                }
-                else
-                    vertex_lock_[i].Unlock();
+				vertex_lock_[i].Lock();
+				paths_per_vertex_[i].push_back(itemn.path);
+				vertex_lock_[i].Unlock();
             }
         }
     }
