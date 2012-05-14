@@ -24,8 +24,8 @@ struct WorkerData {
           thread_number(t_number) {}
 };
 
-void* GraphWorker(void* data) {
-    Graph* g = static_cast<Graph*>(data);
+void* GraphWorker(Worker* w) {
+    Graph* g = static_cast<Graph*>(w->data());
     g->CalculaMenoresCaminhosDe(0);
     return NULL;
 }

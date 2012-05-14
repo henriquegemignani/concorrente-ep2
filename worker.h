@@ -3,7 +3,10 @@
 
 #include <pthread.h>
 
-typedef void* (*WorkerFunction)(void*);
+class Worker;
+
+typedef void* (*WorkerFunction)(Worker*);
+void* WorkerAux(void* data);
 
 class Worker {
   public:
@@ -17,22 +20,31 @@ class Worker {
     }
 
     void Run() {
-        pthread_create(&thread_, &attr_, function_, data_);
+        pthread_create(&thread_, &attr_, WorkerAux, this);
     }
 
     void Join() {
         pthread_join(thread_, NULL);
     }
 
+    WorkerFunction function() { return function_; }
+	void* data() { return data_; }
+	size_t id() { return id_; }
+
   private:
     pthread_t thread_;
     pthread_attr_t attr_;
     WorkerFunction function_;
     void* data_;
-    int id_;
-    static int id_generator;
+    size_t id_;
+    static size_t id_generator;
 };
 
-int Worker::id_generator = 0;
+void* WorkerAux(void* data) {
+	Worker* w = static_cast<Worker*>(data);
+	return w->function()(w);
+}
+
+size_t Worker::id_generator = 0;
 
 #endif /* WORKER_H_ */
