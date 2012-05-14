@@ -93,6 +93,7 @@ class Graph {
     size_t iteration_number() { return iteration_number_; }
 
     void PrintGraph() {
+        printf("\n");
         for(int j = 1; j < size_; ++j) {
             printf("Caminhos para o vertice %d.\n", j);
             const std::multiset<Path, PathCompare>& caminhos = paths_per_vertex_[j];
@@ -105,6 +106,7 @@ class Graph {
                 printf("\n");
             }
         }
+        printf("\n");
     }
 
     void CalculaMenoresCaminhosDe(Vertex v) {
@@ -150,19 +152,22 @@ class Graph {
     void BuscaEmLarguraIterativa(int thread_number) {
         while(!threads_finished_) {
             
+            printf("T%d ", thread_number);
 			Barreira(thread_number);
+            //printf("T%d-B2 ", thread_number);
             
 			if(list_of_paths_.empty()) break;
-            
-			/* Este código de if vai claramente contra a restrição de simetria do EP,
-               porem é usado pois é apenas codigo de debug */
-            if(thread_number == 0) {
-                printf("\nIteracao %d:\n", iteration_number_++);
-                PrintGraph();
-            }
 			
+            if(debug_)
+                if(thread_number == 0) {
+                    printf("\nIteracao %d:\n", iteration_number_++);
+                    PrintGraph();
+                }
 			Barreira(thread_number);
 
+            /* Este codigo de if vai provavelmente contra a restricao de simetria do EP,
+               porem eh usado apenas para geracao de informacao de debug */
+			
             queue_mutex_.Lock();
             if(list_of_paths_.empty()) {
                 queue_mutex_.Unlock();
