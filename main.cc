@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <cstring>
 #include "graph.h"
 #include "worker.h"
 
@@ -33,7 +34,7 @@ void* GraphWorker(Worker* w) {
 int main(int argc, char **argv) {
     size_t num_cores_;
     if(argc < 3) {
-        cout << "Uso: " << argv[0] << " N <path para arquivo de topologia>" << endl;
+        cout << "Uso: " << argv[0] << " N <path para arquivo de topologia> [-debug]" << endl;
         return 1;
     }
     int N = std::atoi(argv[1]);
@@ -45,6 +46,13 @@ int main(int argc, char **argv) {
     cout << "Procurando os " << N << " menores caminhos." << endl;
     Graph g(arquivo);
     //cout << "Grafo: " << endl << g << endl;
+
+	if(argc >= 4) {
+		if(strcmp(argv[3], "-debug") != 0)
+			cout << "Argumento desconhecido: '" << argv[3] << "'" << endl;
+		else
+			g.set_debug(true);
+	}
 
     /* Standard number of threads */
     num_cores_ = 2;

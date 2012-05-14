@@ -46,7 +46,7 @@ typedef bool (*PathCompare)(const Path& l, const Path& r);
 
 class Graph {
   public:
-    Graph(std::istream& input) {
+    Graph(std::istream& input) : debug_(false) {
         // Le a primeira linha da entrada
         std::string first_line;
         std::getline(input, first_line);
@@ -198,6 +198,8 @@ class Graph {
     }
 
     size_t size() const { return matrix_.size(); }
+	bool debug() const { return debug_; }
+	void set_debug(bool debug) { debug_ = debug; }
 
   private:
     QueueItem createQueueItem(Vertex v) {
@@ -223,6 +225,7 @@ class Graph {
     size_t max_paths_;
     size_t number_of_stages_;
     size_t iteration_number_;
+	bool debug_;
 };
 
 #endif /* GRAPH_H_ */
