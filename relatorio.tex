@@ -67,7 +67,7 @@
 Esse relatório possui basicamente notas sobre partes específicas do EP, o relatório do grafo NSFnet e instruções de compilação.
 
 \subsection{Sobre a Barreira}
-A barreira usada foi a barreira de disseminação, como comentada em aula. Seu código está no arquivo graph.h, das linhas 121 a 129. Ela é executada duas vezes a cada iteração dos threads, para garantir que todos os threads terminem simultaneamente.
+A barreira usada foi a barreira de disseminação, como comentada em aula. Seu código está no arquivo graph.h, das linhas 125 a 133. Ela é executada duas vezes a cada iteração dos threads, para garantir que todos os threads terminem simultaneamente.
 
 \subsection{Relatório NFSNet}
 Saída do programa com -debug:
@@ -76,14 +76,12 @@ Procurando os 2 menores caminhos.
 Numero de cores: 16
 
 Iteracao 1:
-T0-B1 T1-B1 T2-B1 T3-B1 T4-B1 T5-B1 T6-B1 T15-B1 T7-B1 T9-B1 T8-B1 T13-B1 T14-B1 T10-B1 T12-B1 T11-B1 T11-B2 T3-B2 T7-B2 T9-B2 T1-B2 T5-B2 T13-B2 T15-B2 T10-B2 T12-B2 T4-B2 T0-B2 T8-B2 T2-B2 T6-B2 T14-B2 T14-B1 T6-B1 T9-B1 T13-B1 
+
 Iteracao 2:
-T0-B1 T7-B1 T4-B1 T12-B1 T8-B1 T2-B1 T5-B1 T1-B1 T15-B1 T3-B1 T11-B1 T10-B1 T9-B2 T1-B2 T5-B2 T13-B2 T7-B2 T15-B2 T2-B2 T10-B2 T14-B2 T6-B2 T0-B2 T8-B2 T4-B2 T3-B2 T11-B2 T12-B2 T13-B1 T15-B1 T2-B1 T10-B1 
-Iteracao 3:
-T0-B1 T5-B1 T14-B1 T8-B1 T1-B1 T6-B1 T12-B1 T4-B1 T3-B1 T9-B1 T11-B1 T7-B1 
+
 
 Saida:
-Realizadas 3 iteracoes.
+Realizadas 2 iteracoes.
 Caminhos para o vertice 1
 	0 - 1
 	0 - 2 - 1
@@ -92,43 +90,43 @@ Caminhos para o vertice 2
 	0 - 1 - 2
 Caminhos para o vertice 3
 	0 - 1 - 3
-	0 - 4 - 3
+	0 - 2 - 1 - 3
 Caminhos para o vertice 4
 	0 - 4
-	0 - 1 - 3 - 4
+	0 - 2 - 6 - 5 - 4
 Caminhos para o vertice 5
 	0 - 2 - 6 - 5
-	0 - 4 - 5
+	0 - 1 - 2 - 6 - 5
 Caminhos para o vertice 6
-	0 - 1 - 2 - 6
 	0 - 2 - 6
+	0 - 1 - 2 - 6
 Caminhos para o vertice 7
-	0 - 2 - 1 - 8 - 7
-	0 - 1 - 8 - 7
+	0 - 2 - 6 - 5 - 7
+	0 - 1 - 2 - 6 - 5 - 7
 Caminhos para o vertice 8
 	0 - 1 - 8
 	0 - 2 - 1 - 8
 Caminhos para o vertice 9
-	0 - 1 - 2 - 6 - 9
 	0 - 2 - 6 - 9
+	0 - 1 - 2 - 6 - 9
 Caminhos para o vertice 10
-	0 - 2 - 1 - 8 - 10
-	0 - 4 - 11 - 14 - 10
+	0 - 2 - 6 - 9 - 10
+	0 - 1 - 2 - 6 - 9 - 10
 Caminhos para o vertice 11
-	0 - 1 - 3 - 4 - 11
-	0 - 4 - 11
+	0 - 2 - 6 - 5 - 4 - 11
+	0 - 2 - 6 - 13 - 14 - 11
 Caminhos para o vertice 12
-	0 - 4 - 11 - 12
 	0 - 2 - 6 - 13 - 12
+	0 - 1 - 2 - 6 - 13 - 12
 Caminhos para o vertice 13
-	0 - 1 - 2 - 6 - 13
 	0 - 2 - 6 - 13
+	0 - 1 - 2 - 6 - 13
 Caminhos para o vertice 14
-	0 - 4 - 11 - 14
 	0 - 2 - 6 - 13 - 14
+	0 - 1 - 2 - 6 - 13 - 14
 Caminhos para o vertice 15
-	0 - 4 - 11 - 14 - 15
-	0 - 4 - 11 - 12 - 15
+	0 - 2 - 6 - 13 - 14 - 15
+	0 - 2 - 6 - 13 - 12 - 15
 \end{lstlisting}
 
 \subsection{Compilando}
