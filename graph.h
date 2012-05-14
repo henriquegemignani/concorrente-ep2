@@ -55,9 +55,9 @@ class Graph {
         size_ = first_line_vect.size();
         matrix_.resize(size_);
         paths_per_vertex_.resize(size_);
-        vertex_lock_.resize(size_);
         number_of_paths_per_vertex_.resize(size_);
-        
+        vertex_lock_.resize(size_);
+
         // Guarda a primeira linha
         matrix_[0] = first_line_vect;
 
