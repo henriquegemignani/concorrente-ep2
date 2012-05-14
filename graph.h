@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <set>
 #include <cmath>
 #include "mutex.h"
 
@@ -37,6 +38,12 @@ struct QueueItem {
         : parents(size) {}
 };
 
+bool PathCompareFunc(const Path& l, const Path& r) {
+	return l.size() < r.size();
+}
+
+typedef bool (*PathCompare)(const Path& l, const Path& r);
+
 class Graph {
   public:
     Graph(std::istream& input) {
@@ -54,7 +61,7 @@ class Graph {
         // A quantidade de elementos da primeira linha é o tamanho do grafo
         size_ = first_line_vect.size();
         matrix_.resize(size_);
-        paths_per_vertex_.resize(size_);
+        paths_per_vertex_.resize(size_, std::multiset<Path, PathCompare>(PathCompareFunc) );
         number_of_paths_per_vertex_.resize(size_);
         vertex_lock_.resize(size_);
 
@@ -75,12 +82,11 @@ class Graph {
     }
     ~Graph() {}
 
-    const std::list<Path>& menores_caminhos(Vertex v) {
+    const std::multiset<Path, PathCompare>& menores_caminhos(Vertex v) {
         return paths_per_vertex_[v];
     }
 
     void set_max_paths(int N) {
-        paths_per_vertex_.resize(N);
         max_paths_ = N;
     }
 
@@ -94,8 +100,6 @@ class Graph {
     void Initialize(size_t num_cores, Vertex v) {
         num_cores_ = num_cores;
         threads_finished_ = false;
-        path_size_.resize(num_cores);
-        num_cores_waiting_ = 0;
         iteration_number_ = 1;
         
         if (num_cores_ < 2)
@@ -151,13 +155,14 @@ class Graph {
             list_of_paths_.pop_front();
             queue_mutex_.Unlock();
 
-            path_size_[thread_number] = item.path.size();
             for(size_t i = 0; i < size_; i++) {
                 vertex_lock_[i].Lock();
                 bool b = (matrix_[item.path.back()][i] && number_of_paths_per_vertex_[i] < max_paths_ && !item.parents[i]);
                 vertex_lock_[i].Unlock();
 				if(!b) continue;
+
 				number_of_paths_per_vertex_[i]++;
+
 				QueueItem itemn = item;
 				itemn.path.push_back(i);
 				itemn.parents[i] = true;
@@ -173,7 +178,7 @@ class Graph {
 				queue_mutex_.Unlock();
 
 				vertex_lock_[i].Lock();
-				paths_per_vertex_[i].push_back(itemn.path);
+				paths_per_vertex_[i].insert(itemn.path);
 				vertex_lock_[i].Unlock();
             }
         }
@@ -208,15 +213,13 @@ class Graph {
     std::vector<Mutex> vertex_lock_;
     Mutex queue_mutex_, counter_mutex_;
 
-    std::vector< size_t > path_size_;
     std::vector< std::vector<bool> > matrix_;
-    std::vector< std::list<Path> > paths_per_vertex_;
+    std::vector< std::multiset<Path, PathCompare> > paths_per_vertex_;
     std::list<QueueItem> list_of_paths_;
 
     std::vector<size_t> arrived;
     std::vector<size_t> number_of_paths_per_vertex_;
     size_t size_;
-    size_t num_cores_waiting_;
     size_t max_paths_;
     size_t number_of_stages_;
     size_t iteration_number_;

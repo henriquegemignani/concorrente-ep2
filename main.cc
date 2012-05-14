@@ -87,8 +87,8 @@ int main(int argc, char **argv) {
     printf("Realizadas %d iteracoes.\n", g.iteration_number() - 1);
     for(int j = 1; j < g.size(); ++j) {
         cout << "Caminhos para o vertice " << j << endl;
-        const std::list<Path>& caminhos = g.menores_caminhos(j);
-        for(std::list<Path>::const_iterator it = caminhos.begin(); it != caminhos.end(); ++it) {
+        const std::multiset<Path, PathCompare>& caminhos = g.menores_caminhos(j);
+        for(std::multiset<Path, PathCompare>::const_iterator it = caminhos.begin(); it != caminhos.end(); ++it) {
             cout << '\t';
             Path::const_iterator v = it->begin();
             cout << *v;
