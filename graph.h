@@ -46,10 +46,12 @@ bool PathCompareFunc(const Path& l, const Path& r) {
 typedef bool (*PathCompare)(const Path& l, const Path& r);
 
 void Skip() {
+    #ifndef WIN32
     struct timespec req, rem;
 	req.tv_sec = 0;
 	req.tv_nsec = 5000;
 	nanosleep(&req, &rem);
+    #endif
 }
 
 class Graph {
