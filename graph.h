@@ -9,6 +9,7 @@
 #include <list>
 #include <set>
 #include <cmath>
+#include <ctime>
 #include "mutex.h"
 
 typedef int Vertex;
@@ -43,6 +44,13 @@ bool PathCompareFunc(const Path& l, const Path& r) {
 }
 
 typedef bool (*PathCompare)(const Path& l, const Path& r);
+
+void Skip() {
+    struct timespec req, rem;
+	req.tv_sec = 0;
+	req.tv_nsec = 5000;
+	nanosleep(&req, &rem);
+}
 
 class Graph {
   public:
@@ -110,9 +118,9 @@ class Graph {
             paths_per_vertex_[i].clear();
         }
         
-        arrived.resize(num_cores_);
+        arrived_.resize(num_cores_);
         for(size_t i = 0; i < num_cores; i++)
-            arrived[i] = 0;
+            arrived_[i] = 0;
         InitializeSearch(v);
     }
 
@@ -123,10 +131,10 @@ class Graph {
 	void Barreira(int thread_number) {
 		size_t sum = 1;
 		for(size_t i = 1; i <= number_of_stages_; i++) {
-			arrived[thread_number]++;
+			arrived_[thread_number]++;
 			int next_arrive = (thread_number+sum) % num_cores_;
 			sum <<= 1;
-			while (arrived[next_arrive] < arrived[thread_number]) {};
+			while (arrived_[next_arrive] < arrived_[thread_number]) Skip();
 		}
 	}
 
@@ -215,7 +223,7 @@ class Graph {
     std::vector< std::multiset<Path, PathCompare> > paths_per_vertex_;
     std::list<QueueItem> list_of_paths_;
 
-    std::vector<size_t> arrived;
+    std::vector<size_t> arrived_;
     size_t size_;
     size_t max_paths_;
     size_t number_of_stages_;
