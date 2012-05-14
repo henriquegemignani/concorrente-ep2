@@ -62,7 +62,6 @@ class Graph {
         size_ = first_line_vect.size();
         matrix_.resize(size_);
         paths_per_vertex_.resize(size_, std::multiset<Path, PathCompare>(PathCompareFunc) );
-        number_of_paths_per_vertex_.resize(size_);
         vertex_lock_.resize(size_);
 
         // Guarda a primeira linha
@@ -109,7 +108,6 @@ class Graph {
 
         for(size_t i = 0; i < size_; i++) {
             paths_per_vertex_[i].clear();
-            number_of_paths_per_vertex_[i] = 0;
         }
         
         arrived.resize(num_cores_);
@@ -157,11 +155,9 @@ class Graph {
 
             for(size_t i = 0; i < size_; i++) {
                 vertex_lock_[i].Lock();
-                bool b = (matrix_[item.path.back()][i] && number_of_paths_per_vertex_[i] < max_paths_ && !item.parents[i]);
+                bool b = (matrix_[item.path.back()][i] && paths_per_vertex_[i].size() < max_paths_ && !item.parents[i]);
                 vertex_lock_[i].Unlock();
 				if(!b) continue;
-
-				number_of_paths_per_vertex_[i]++;
 
 				QueueItem itemn = item;
 				itemn.path.push_back(i);
@@ -220,7 +216,6 @@ class Graph {
     std::list<QueueItem> list_of_paths_;
 
     std::vector<size_t> arrived;
-    std::vector<size_t> number_of_paths_per_vertex_;
     size_t size_;
     size_t max_paths_;
     size_t number_of_stages_;
