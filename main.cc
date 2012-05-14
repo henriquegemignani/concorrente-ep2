@@ -26,7 +26,7 @@ struct WorkerData {
 
 void* GraphWorker(Worker* w) {
     Graph* g = static_cast<Graph*>(w->data());
-    g->CalculaMenoresCaminhosDe(0);
+    g->BuscaEmLarguraIterativa(w->id());
     return NULL;
 }
 
