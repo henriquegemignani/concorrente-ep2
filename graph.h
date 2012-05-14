@@ -9,6 +9,7 @@
 #include <list>
 #include <set>
 #include <cmath>
+#include <ctime>
 #include "mutex.h"
 
 typedef int Vertex;
@@ -44,6 +45,13 @@ bool PathCompareFunc(const Path& l, const Path& r) {
 
 typedef bool (*PathCompare)(const Path& l, const Path& r);
 
+void Skip() {
+    struct timespec req, rem;
+	req.tv_sec = 0;
+	req.tv_nsec = 5000;
+	nanosleep(&req, &rem);
+}
+
 class Graph {
   public:
     Graph(std::istream& input) : debug_(false) {
@@ -62,7 +70,6 @@ class Graph {
         size_ = first_line_vect.size();
         matrix_.resize(size_);
         paths_per_vertex_.resize(size_, std::multiset<Path, PathCompare>(PathCompareFunc) );
-        number_of_paths_per_vertex_.resize(size_);
         vertex_lock_.resize(size_);
 
         // Guarda a primeira linha
@@ -126,12 +133,11 @@ class Graph {
 
         for(size_t i = 0; i < size_; i++) {
             paths_per_vertex_[i].clear();
-            number_of_paths_per_vertex_[i] = 0;
         }
         
-        arrived.resize(num_cores_);
+        arrived_.resize(num_cores_);
         for(size_t i = 0; i < num_cores; i++)
-            arrived[i] = 0;
+            arrived_[i] = 0;
         InitializeSearch(v);
     }
 
@@ -142,10 +148,10 @@ class Graph {
 	void Barreira(int thread_number) {
 		size_t sum = 1;
 		for(size_t i = 1; i <= number_of_stages_; i++) {
-			arrived[thread_number]++;
+			arrived_[thread_number]++;
 			int next_arrive = (thread_number+sum) % num_cores_;
 			sum <<= 1;
-			while (arrived[next_arrive] < arrived[thread_number]) {};
+			while (arrived_[next_arrive] < arrived_[thread_number]) Skip();
 		}
 	}
 
@@ -179,11 +185,9 @@ class Graph {
 
             for(size_t i = 0; i < size_; i++) {
                 vertex_lock_[i].Lock();
-                bool b = (matrix_[item.path.back()][i] && number_of_paths_per_vertex_[i] < max_paths_ && !item.parents[i]);
+                bool b = (matrix_[item.path.back()][i] && paths_per_vertex_[i].size() < max_paths_ && !item.parents[i]);
                 vertex_lock_[i].Unlock();
 				if(!b) continue;
-
-				number_of_paths_per_vertex_[i]++;
 
 				QueueItem itemn = item;
 				itemn.path.push_back(i);
@@ -241,8 +245,7 @@ class Graph {
     std::vector< std::multiset<Path, PathCompare> > paths_per_vertex_;
     std::list<QueueItem> list_of_paths_;
 
-    std::vector<size_t> arrived;
-    std::vector<size_t> number_of_paths_per_vertex_;
+    std::vector<size_t> arrived_;
     size_t size_;
     size_t max_paths_;
     size_t number_of_stages_;
